@@ -58,8 +58,8 @@ fn convert_bson_value_to_nu_value(v: &Bson, tag: impl Into<Tag>) -> Tagged<Value
             collected.into_tagged_value()
         }
         // TODO: Add Int32 to nushell?
-        Bson::I32(n) => Value::Primitive(Primitive::Int(*n as i64)).tagged(tag),
-        Bson::I64(n) => Value::Primitive(Primitive::Int(*n as i64)).tagged(tag),
+        Bson::I32(n) => Value::number(n).tagged(tag),
+        Bson::I64(n) => Value::number(n).tagged(tag),
         Bson::JavaScriptCode(js) => {
             let mut collected = TaggedDictBuilder::new(tag);
             collected.insert_tagged(
@@ -82,10 +82,7 @@ fn convert_bson_value_to_nu_value(v: &Bson, tag: impl Into<Tag>) -> Tagged<Value
         }
         Bson::TimeStamp(ts) => {
             let mut collected = TaggedDictBuilder::new(tag);
-            collected.insert_tagged(
-                "$timestamp".to_string(),
-                Value::Primitive(Primitive::Int(*ts as i64)).tagged(tag),
-            );
+            collected.insert_tagged("$timestamp".to_string(), Value::number(ts).tagged(tag));
             collected.into_tagged_value()
         }
         Bson::Binary(bst, bytes) => {
@@ -93,7 +90,7 @@ fn convert_bson_value_to_nu_value(v: &Bson, tag: impl Into<Tag>) -> Tagged<Value
             collected.insert_tagged(
                 "$binary_subtype".to_string(),
                 match bst {
-                    BinarySubtype::UserDefined(u) => Value::Primitive(Primitive::Int(*u as i64)),
+                    BinarySubtype::UserDefined(u) => Value::number(u),
                     _ => Value::Primitive(Primitive::String(binary_subtype_to_string(*bst))),
                 }
                 .tagged(tag),
